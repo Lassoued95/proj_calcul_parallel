@@ -6,9 +6,11 @@ CC      = gcc
 CFLAGS  = -O2 -Wall -Wextra -std=c11 -fopenmp
 COMMUN  = graphe.o mesures.o
 
-PROGRAMMES = test_commun generer backtrack_seq
-# B2 ajoutera : glouton_seq glouton_par
-# B3 ajoutera : backtrack_par
+ifeq ($(OS),Windows_NT)
+RM = del /Q /F
+endif
+
+PROGRAMMES = test_commun generer glouton_seq glouton_par backtrack_seq backtrack_par
 
 all: $(PROGRAMMES)
 
@@ -21,9 +23,14 @@ generer: generer.o $(COMMUN)
 backtrack_seq: backtrack_seq.o $(COMMUN)
 	$(CC) $(CFLAGS) -o $@ $^
 
-# Modèle pour les programmes de B2 et B3 (exemple) :
-# glouton_seq: glouton_seq.o $(COMMUN)
-# 	$(CC) $(CFLAGS) -o $@ $^
+glouton_seq: glouton_seq.o $(COMMUN)
+	$(CC) $(CFLAGS) -o $@ $^
+
+glouton_par: glouton_par.o $(COMMUN)
+	$(CC) $(CFLAGS) -o $@ $^
+
+backtrack_par: backtrack_par.o $(COMMUN)
+	$(CC) $(CFLAGS) -o $@ $^
 
 %.o: %.c graphe.h mesures.h
 	$(CC) $(CFLAGS) -c $<
@@ -32,6 +39,10 @@ test: test_commun
 	./test_commun
 
 clean:
-	rm -f *.o $(PROGRAMMES) *.exe
+ifeq ($(OS),Windows_NT)
+	cmd /C "del /Q *.o *.exe test_commun.exe generer.exe glouton_seq.exe glouton_par.exe backtrack_seq.exe backtrack_par.exe 2>NUL"
+else
+	$(RM) *.o $(PROGRAMMES) *.exe
+endif
 
 .PHONY: all test clean
